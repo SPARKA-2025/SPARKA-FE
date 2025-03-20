@@ -1,0 +1,19 @@
+Note: Admin
+✓ Edit dan delete fakultas
+✓ Edit dan delete blok
+- *Halaman Edit slot (on prog)
+✓ api menyimpan bagian(part) blok (on prog)
+✓ detail book
+
+- *Operator role
+- Role managemen
+✓ api profil user
+✓ Detail transaksi mau tk buat kek mobile / fathur
+
+** Halaman Edit **
+✓ Visual gateway bekerja
+✓ Input Properti CCTV (Angle, Url)
+✓ Input Properti Gateway (Text, Position selectable untuk sudut)
+✓ Delete mode
+- Sync Api
+✓ Part blok ( api dan tampilan)
