@@ -15,12 +15,8 @@ export default async function middleware(req) {
   const cookie = cookies().get("token")?.value;
   //console.log("Raw Token:", cookie);
 
-  if (!rawToken) {
-    if (!isPublicRoute) {
-      return NextResponse.redirect(new URL('/admin/login', req.url));
-    }
-    return NextResponse.next();
-  }
+  let tokenData = null;
+  let isAuthorized = false;
 
   if (cookie) {
     try {
