@@ -1,108 +1,156 @@
 "use client";
 
+import { useState, useRef, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { Button, IconButton } from "@mui/material";
-import Logo from "/public/assets/icon/logo.svg";
-import ProfilIcon from "/public/assets/icon/profile.svg";
+import Image from "next/image";
+import Cookies from "js-cookie";
+
+import ProfileIcon from "/public/assets/icon/profile.svg";
 import DashboardIcon from "/public/assets/icon/dashboard.svg";
 import BookingIcon from "/public/assets/icon/booking.svg";
 import MonitoringIcon from "/public/assets/icon/monitoring.svg";
 import ReportIcon from "/public/assets/icon/report.svg";
-import OpenMenuIcon from "/public/assets/icon/menu.svg";
-import { useEffect, useState } from "react";
-import Cookies from "js-cookie";
-import { decrypt } from "../lib/utils/service/decrypt";
+import MenuIcon from "/public/assets/icon/menu.svg";
 
 export default function Sidebar({ active = 0 }) {
-  const [openSide, setOpenSide] = useState(false);
-  const username = Cookies.get("username");
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
+  const router = useRouter();
+  const username = Cookies.get("username") || "Admin";
 
-  function TopBar() {
-    return (
-      <div className="bg-white top-0 fixed flex w-screen h-[72px] shadow-md py-4 px-[2%] justify-between">
-        <div className=" flex gap-4 items-center w-auto relative">
-          <Logo className="h-full" />
-          <span className="text-primary font-bold text-3xl items-center">
-            Sparka
-          </span>
-          <Button
-            onClick={() => setOpenSide(!openSide)}
-            className="text-primary flex text-center h-full hover:bg-gray-400"
-          >
-            <OpenMenuIcon className="h-[72%]" />
-          </Button>
-        </div>
-        <div className=" flex gap-4 items-center w-auto">
-          <div className="flex h-full items-center gap-1">
-            <ProfilIcon className="text-gray-500 h-[80%] text-center" />
-            <span className="text-gray-500 font-medium text-base text-center items-center">
-              {username || 'Admin'}
-            </span>
-          </div>
-          <Button
-            variant="contained"
-            color="primary"
-            className="bg-primary w-fit h-[90%] px-2"
-          >
-            Logout
-          </Button>
-        </div>
-      </div>
-    );
-  }
+  const menuItems = [
+    { label: "Dashboard", icon: DashboardIcon, href: "/admin" },
+    { label: "Booking", icon: BookingIcon, href: "/admin/booking" },
+    { label: "Monitoring", icon: MonitoringIcon, href: "/admin/monitoring" },
+    { label: "Laporan", icon: ReportIcon, href: "/admin/laporan" },
+    { label: "Add Admin", icon: ProfileIcon, href: "/api/register-admin" },
+  ];
 
-  function LeftBar() {
-    const menuList = [
-      {
-        label: "Dashboard",
-        icon: DashboardIcon,
-        href: "/admin",
-      },
-      {
-        label: "Booking",
-        icon: BookingIcon,
-        href: "/admin/booking",
-      },
-      {
-        label: "Monitoring",
-        icon: MonitoringIcon,
-        href: "/admin/monitoring",
-      },
-      {
-        label: "Report",
-        icon: ReportIcon,
-        href: "/admin/laporan",
-      },
-    ];
+  const handleMenuClick = (href) => {
+    setSidebarOpen(false);
+    router.push(href);
+  };
 
-    return (
-      <div className="bg-white left-0 top-0 fixed flex h-screen w-[28%] shadow-xl px-[2%]">
-        <div className=" mt-[max(8%,72px)] pt-[8%] flex h-full flex-col w-full gap-4">
-          {menuList.map((key, index) => (
-            <div
-              key={index}
-              className={
-                " w-full  items-center" +
-                (active === index ? " bg-gray-300 rounded-sm" : " ")
-              }
-            >
-              <Button
-                startIcon={<key.icon className="text-primary w-8" />}
-                href={key.href}
-                className=" text-primary font-bold text-lg w-full h-12 justify-start"
-              >
-                {key.label}
-              </Button>
-            </div>
-          ))}
-        </div>
-      </div>
-    );
-  }
+  const handleLogout = () => {
+    Cookies.remove("username");
+    router.push("/login");
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   return (
-    <div className="w-full fixed z-[51]">
-      {openSide && <LeftBar />}
-      <TopBar />
-    </div>
+    <>
+      {/* Topbar */}
+      <div className="fixed top-0 w-full h-[72px] bg-white shadow-md px-6 py-4 flex items-center justify-between z-50">
+        <div className="flex items-center gap-4">
+          <IconButton
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            className="hover:bg-gray-200"
+          >
+            <MenuIcon className="h-6 w-6 text-primary" />
+          </IconButton>
+          <div className="transition-all duration-300 w-[200px]">
+            <Image
+              src="/assets/img/unnesxsparka-colour.svg"
+              alt="Logo SPARKA"
+              width={200}
+              height={40}
+              priority
+            />
+          </div>
+        </div>
+
+        <div className="relative" ref={dropdownRef}>
+          <div
+            onClick={() => setDropdownOpen((prev) => !prev)}
+            className="flex items-center gap-2 cursor-pointer select-none bg-primary px-4 py-2 rounded-md hover:opacity-90 transition"
+          >
+            <ProfileIcon className="h-5 w-5 text-white" />
+            <span className="text-sm font-medium text-white">{username}</span>
+          </div>
+
+          {dropdownOpen && (
+            <div className="absolute right-0 mt-2 w-44 bg-white rounded-md shadow-md border border-gray-200 z-50 overflow-hidden">
+              <button
+                onClick={handleLogout}
+                className="flex items-center gap-2 w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-5 w-5 text-red-600"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M17 16l4-4m0 0l-4-4m4 4H7"
+                  />
+                </svg>
+                <span>Keluar</span>
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Sidebar */}
+      <aside
+        className={`fixed top-0 left-0 h-screen bg-white shadow-lg pt-[88px] z-40 transition-all duration-300 ${
+          sidebarOpen ? "w-[240px]" : "w-0"
+        } overflow-hidden`}
+      >
+        {sidebarOpen && (
+          <nav className="flex flex-col gap-2 px-4 animate-fade-in">
+            {menuItems.map((item, index) => {
+              const isActive = active === index;
+              return (
+                <div
+                  key={item.label}
+                  onClick={() => handleMenuClick(item.href)}
+                  className={`flex items-center gap-3 px-4 py-3 rounded-lg cursor-pointer transition-all ${
+                    isActive
+                      ? "bg-[#E3E7F3] font-bold text-primary"
+                      : "hover:bg-gray-100 text-gray-700"
+                  }`}
+                >
+                  <item.icon className="h-6 w-6 text-primary" />
+                  <span className="text-base">{item.label}</span>
+                </div>
+              );
+            })}
+          </nav>
+        )}
+      </aside>
+
+      {/* Animasi */}
+      <style jsx>{`
+        .animate-fade-in {
+          animation: fadeIn 0.3s ease-in-out;
+        }
+        @keyframes fadeIn {
+          from {
+            opacity: 0;
+            transform: translateX(-10px);
+          }
+          to {
+            opacity: 1;
+            transform: translateX(0);
+          }
+        }
+      `}</style>
+    </>
   );
 }

@@ -1,14 +1,19 @@
+//middleware,js
 import { NextResponse } from "next/server";
-import { decrypt } from "./app/lib/utils/service/decrypt";
 import { cookies } from "next/headers";
+import { jwtDecode } from "jwt-decode"; // Ensure this is the correct import
 
-const publicRoutes = ['/login', '/admin/login'];
+const publicRoutes = ["/login", "/admin/login"];
 
 export default async function middleware(req) {
+  //console.log("Middleware is running...");
+
   const path = req.nextUrl.pathname;
   const isPublicRoute = publicRoutes.includes(path);
 
-  const rawToken = cookies().get('token')?.value;
+  // Ambil cookie token
+  const cookie = cookies().get("token")?.value;
+  //console.log("Raw Token:", cookie);
 
   if (!rawToken) {
     if (!isPublicRoute) {
@@ -17,27 +22,29 @@ export default async function middleware(req) {
     return NextResponse.next();
   }
 
-  let token;
-  try {
-    token = await decrypt(rawToken);
-  } catch (err) {
-    console.error("Failed to decrypt token:", err);
-    return NextResponse.redirect(new URL('/admin/login', req.url));
+  if (cookie) {
+    try {
+      tokenData = jwtDecode(cookie); 
+      // console.log("Decoded Token:", tokenData); -> debug only
+
+      isAuthorized = Boolean(tokenData?.iss); // Cek jika token valid
+    } catch (error) {
+      console.error("JWT Decode Error:", error);
+    }
   }
 
-  const isAuthorized = Boolean(token?.iss);
+  //console.log("Is Authorized:", isAuthorized);
 
-  if (!isAuthorized && !isPublicRoute) {
-    return NextResponse.redirect(new URL('/admin/login', req.url));
+  // Redirect jika belum login
+  if (!isPublicRoute && !isAuthorized) {
+    return NextResponse.redirect(new URL("/admin/login", req.url));
   }
-
-  if (isAuthorized && isPublicRoute) {
-    return NextResponse.redirect(new URL('/admin', req.url));
+  
+  if (isPublicRoute && isAuthorized) {
+    return NextResponse.redirect(new URL("/admin", req.url));
   }
 
   return NextResponse.next();
 }
 
-export const config = {
-  matcher: '/((?!.*\\.).*)',
-};
+export const config = { matcher: "/((?!.*\\.).*)" };

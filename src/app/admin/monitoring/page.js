@@ -18,15 +18,12 @@ export default function Main() {
     image: null,
   });
 
-  // const router = useRouter();
-
   const fetchFakultas = async () => {
     try {
       const res = await fetchApi({ endpoint: `/admin/fakultas` });
       setListFakultas(res.data);
-      // console.log(res.data)
     } catch (error) {
-      console.error("Failed to fetch fakultas:", error);
+      console.error("Gagal mengambil data fakultas:", error);
     }
   };
 
@@ -62,47 +59,39 @@ export default function Main() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
+
     try {
       const endpoint = inputData.id
         ? `/admin/fakultas/${inputData.id}`
         : `/admin/fakultas`;
       const method = "post";
-  
-      // Tentukan apakah menggunakan FormData atau URLSearchParams
+
       const formData = new FormData();
       const contentType = "multipart/form-data";
-      
-      // Tambahkan data ke formData atau URLSearchParams
+
       formData.append("nama", inputData.nama);
       formData.append("deskripsi", inputData.deskripsi);
       if (inputData.image) formData.append("image", inputData.image);
-  
-      // Periksa apa yang dikirimkan ke API
-      console.log("Payload sent to API:", [...formData.entries()]);
-  
+
       const res = await fetchApi({
         endpoint,
         method,
         data: formData,
         contentType,
       });
-  
-      console.log("Response from api:", res);
-  
-      // Tangani respon dari API
+
       if (res.status === "success") {
-        toast.success(inputData.id ? "Faculty updated successfully!" : "Faculty added successfully!");
+        toast.success(inputData.id ? "Fakultas berhasil diperbarui!" : "Fakultas berhasil ditambahkan!");
         fetchFakultas();
         setShowModal(false);
       } else {
-        toast.error(`Failed to save faculty. Please try again.\n${JSON.stringify(res)}`);
+        toast.error(`Gagal menyimpan fakultas. Silakan coba lagi.\n${JSON.stringify(res)}`);
       }
     } catch (error) {
-      toast.error("Error submitting faculty:", error);
+      toast.error("Terjadi kesalahan saat mengirim data fakultas.");
+      console.error("Error submit fakultas:", error);
     }
   };
-  
 
   const handleDelete = async () => {
     try {
@@ -112,20 +101,16 @@ export default function Main() {
       const res = await fetchApi({ endpoint, method });
 
       if (res.status === "success") {
-        toast.success("Faculty deleted successfully!");
+        toast.success("Fakultas berhasil dihapus!");
         fetchFakultas();
         setShowModal(false);
       } else {
-        toast.error(
-          `Failed to delete faculty. Please try again.\n${JSON.stringify(res)}`
-        );
+        toast.error(`Gagal menghapus fakultas. Silakan coba lagi.\n${JSON.stringify(res)}`);
       }
     } catch (error) {
-      console.error("Error deleting faculty:", error);
+      console.error("Terjadi kesalahan saat menghapus fakultas:", error);
     }
   };
-
-  // useEffect( () => console.log(inputData), [inputData])
 
   return (
     <main className="bg-white-smoke h-screen justify-start px-2 flex flex-wrap overflow-y-auto pt-[4%]">
@@ -137,7 +122,7 @@ export default function Main() {
             desc={fakultas?.deskripsi}
             href={`monitoring/${fakultas.id}`}
             imageBase64={fakultas?.image}
-            onEditClick={(e) => handleEditClick(e, fakultas)} // Edit handler
+            onEditClick={(e) => handleEditClick(e, fakultas)}
           />
         ))}
         <div className="flex w-full h-[256px] mb-12 py-2 justify-center">
@@ -151,28 +136,28 @@ export default function Main() {
         </div>
       </div>
 
-      {/* ModalForm */}
+      {/* Modal Formulir Fakultas */}
       {showModal && (
         <ModalForm
           open={showModal}
           onClose={() => setShowModal(false)}
-          title={inputData.id ? "Edit Fakultas" : "Tambah Fakultas"} // Dynamic Title
-          values={inputData} // Use initialValues for form synchronization
+          title={inputData.id ? "Edit Fakultas" : "Tambah Fakultas"}
+          values={inputData}
           onSubmit={handleSubmit}
           onDelete={handleDelete}
-          onFieldChange={handleFieldChange} // Pass field change handler
-          onFileChange={handleFileChange} // Pass file change handler
+          onFieldChange={handleFieldChange}
+          onFileChange={handleFileChange}
           fields={[
-            { name: "nama", label: "Nama", type: "text", required: true },
+            { name: "nama", label: "Nama Fakultas", type: "text", required: true },
             {
               name: "deskripsi",
-              label: "Deskripsi",
+              label: "Deskripsi Fakultas",
               type: "textarea",
               required: true,
               multiline: true,
               rows: 4,
             },
-            { name: "image", label: "Image", type: "file", required: inputData.id ? false : true },
+            { name: "image", label: "Gambar Fakultas", type: "file", required: inputData.id ? false : true },
           ]}
         />
       )}
