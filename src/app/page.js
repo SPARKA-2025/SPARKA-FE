@@ -66,7 +66,7 @@ export default function Home() {
         </nav>
         <div className="hidden md:flex gap-4">
           <Link
-            href="/login"
+            href="/admin/login"
             className="bg-primary text-white px-6 py-2 rounded-full hover:bg-primary-dark transition-colors"
           >
             Masuk
