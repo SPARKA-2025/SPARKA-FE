@@ -23,12 +23,18 @@ export default function LoginAdmin() {
 
     const data = await loginAdmin(formData);
     if (data?.access_token) {
-      toast.success("Berhasil masuk.");
-      router.push("/admin");
-    } else {
-      toast.error(`Gagal masuk: ${data.message}`);
-    }
+      toast.success("Berhasil masuk sebagai admin.", {
+        autoClose: 2000,
+      });
 
+      setTimeout(() => {
+        router.push("/admin");
+      }, 2000);
+    } else {
+      toast.error(`Gagal masuk: ${data.message}`, {
+        autoClose: 3000,
+      });
+    }
     setSedangLogin(false);
   };
 

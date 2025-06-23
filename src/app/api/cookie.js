@@ -2,11 +2,11 @@ import { NextResponse } from "next/server";
 
 export default async function handler(req, res) {
     const { session } = req.body;
-    return NextResponse.next().cookies.set('session', session, {
+    return NextResponse.next().cookies.set("session", session, {
         httpOnly: true,
-        secure: false,
+        secure: true,
         expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
         sameSite: "lax",
-        path: "/",  
+        path: "/",
     });
-};
+}

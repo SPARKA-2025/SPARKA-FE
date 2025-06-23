@@ -2,22 +2,23 @@
 
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Button, IconButton } from "@mui/material";
+import { Button, Tooltip } from "@mui/material";
 import Image from "next/image";
+import Link from "next/link";
 import Cookies from "js-cookie";
-
 import ProfileIcon from "/public/assets/icon/profile.svg";
 import DashboardIcon from "/public/assets/icon/dashboard.svg";
 import BookingIcon from "/public/assets/icon/booking.svg";
 import MonitoringIcon from "/public/assets/icon/monitoring.svg";
 import ReportIcon from "/public/assets/icon/report.svg";
-import MenuIcon from "/public/assets/icon/menu.svg";
+import fetchApi from "../lib/fetch/fetchApi";
+import logoutHandler from "../lib/action/admin/logout";
 
 export default function Sidebar({ active = 0 }) {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const router = useRouter();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
-  const router = useRouter();
+
   const username = Cookies.get("username") || "Admin";
 
   const menuItems = [
@@ -25,18 +26,8 @@ export default function Sidebar({ active = 0 }) {
     { label: "Booking", icon: BookingIcon, href: "/admin/booking" },
     { label: "Monitoring", icon: MonitoringIcon, href: "/admin/monitoring" },
     { label: "Laporan", icon: ReportIcon, href: "/admin/laporan" },
-    { label: "Add Admin", icon: ProfileIcon, href: "/api/register-admin" },
+    { label: "Add Admin", icon: ProfileIcon, href: "/admin/register-admin" },
   ];
-
-  const handleMenuClick = (href) => {
-    setSidebarOpen(false);
-    router.push(href);
-  };
-
-  const handleLogout = () => {
-    Cookies.remove("username");
-    router.push("/login");
-  };
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -48,109 +39,104 @@ export default function Sidebar({ active = 0 }) {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  return (
-    <>
-      {/* Topbar */}
-      <div className="fixed top-0 w-full h-[72px] bg-white shadow-md px-6 py-4 flex items-center justify-between z-50">
-        <div className="flex items-center gap-4">
-          <IconButton
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="hover:bg-gray-200"
-          >
-            <MenuIcon className="h-6 w-6 text-primary" />
-          </IconButton>
-          <div className="transition-all duration-300 w-[200px]">
-            <Image
-              src="/assets/img/unnesxsparka-colour.svg"
-              alt="Logo SPARKA"
-              width={200}
-              height={40}
-              priority
-            />
-          </div>
-        </div>
+  const handleLogout = async () => {
+  try {
+    const response = await logoutHandler();
 
-        <div className="relative" ref={dropdownRef}>
-          <div
-            onClick={() => setDropdownOpen((prev) => !prev)}
-            className="flex items-center gap-2 cursor-pointer select-none bg-primary px-4 py-2 rounded-md hover:opacity-90 transition"
-          >
-            <ProfileIcon className="h-5 w-5 text-white" />
-            <span className="text-sm font-medium text-white">{username}</span>
-          </div>
+    if (response?.message && response?.message !== "success") {
+      throw new Error(response.message);
+    }
+    Cookies.remove("token");
+    Cookies.remove("username");
+    router.push("/admin/login");
+    alert("Berhasil keluar.");
 
-          {dropdownOpen && (
-            <div className="absolute right-0 mt-2 w-44 bg-white rounded-md shadow-md border border-gray-200 z-50 overflow-hidden">
-              <button
-                onClick={handleLogout}
-                className="flex items-center gap-2 w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5 text-red-600"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M17 16l4-4m0 0l-4-4m4 4H7"
-                  />
-                </svg>
-                <span>Keluar</span>
-              </button>
-            </div>
-          )}
-        </div>
+  } catch (error) {
+    console.error("Gagal keluar:", error);
+    alert("Gagal keluar: " + error.message);
+  }
+};
+
+  const TopBar = () => (
+    <div className="fixed top-0 w-full h-[72px] bg-white shadow-md px-6 py-4 flex items-center justify-between z-50">
+      <div className="flex items-center gap-4">
+        <Image
+          src="/assets/img/unnesxsparka-colour.svg"
+          alt="Logo SPARKA"
+          width={250}
+          height={40}
+        />
       </div>
 
-      {/* Sidebar */}
-      <aside
-        className={`fixed top-0 left-0 h-screen bg-white shadow-lg pt-[88px] z-40 transition-all duration-300 ${
-          sidebarOpen ? "w-[240px]" : "w-0"
-        } overflow-hidden`}
-      >
-        {sidebarOpen && (
-          <nav className="flex flex-col gap-2 px-4 animate-fade-in">
-            {menuItems.map((item, index) => {
-              const isActive = active === index;
-              return (
+      <div className="relative" ref={dropdownRef}>
+        <div
+          className="flex items-center gap-2 text-gray-600 cursor-pointer px-4 py-1 bg-primary rounded hover:opacity-90 transition-all"
+          onClick={() => setDropdownOpen((prev) => !prev)}
+        >
+          <ProfileIcon className="h-5 w-5 text-white" />
+          <span className="text-sm font-medium text-white">{username}</span>
+        </div>
+
+        {dropdownOpen && (
+          <div className="absolute right-0 w-40 mt-2 bg-white border border-gray-200 rounded-md shadow-md z-50">
+            <button
+              onClick={handleLogout}
+              className="flex items-center w-full gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-5 w-5 text-red-600"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M17 16l4-4m0 0l-4-4m4 4H7"
+                />
+              </svg>
+              Keluar
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+
+  const LeftBar = () => (
+    <aside className="md:flex fixed z-30 bg-gray-700 h-[45vh] w-16 flex-col justify-between items-center p-2 left-0 top-1/4 rounded-e-3xl">
+      <nav className="flex flex-col justify-evenly items-center h-full text-gray-50">
+        {menuItems.map((item, index) => {
+          const isActive = active === index;
+          return (
+            <Link href={item.href} key={item.label}>
+              <Tooltip
+                title={item.label}
+                arrow
+                placement="right"
+                enterDelay={200}
+                leaveDelay={150}>
                 <div
-                  key={item.label}
-                  onClick={() => handleMenuClick(item.href)}
-                  className={`flex items-center gap-3 px-4 py-3 rounded-lg cursor-pointer transition-all ${
-                    isActive
-                      ? "bg-[#E3E7F3] font-bold text-primary"
-                      : "hover:bg-gray-100 text-gray-700"
+                  className={`cursor-pointer p-2 rounded-lg ${
+                    isActive ? "bg-gray-500" : "hover:bg-gray-600"
                   }`}
                 >
-                  <item.icon className="h-6 w-6 text-primary" />
-                  <span className="text-base">{item.label}</span>
+                  <item.icon className="h-6 w-6" />
                 </div>
-              );
-            })}
-          </nav>
-        )}
-      </aside>
+              </Tooltip>
+            </Link>
+          );
+        })}
+      </nav>
+    </aside>
+  );
 
-      {/* Animasi */}
-      <style jsx>{`
-        .animate-fade-in {
-          animation: fadeIn 0.3s ease-in-out;
-        }
-        @keyframes fadeIn {
-          from {
-            opacity: 0;
-            transform: translateX(-10px);
-          }
-          to {
-            opacity: 1;
-            transform: translateX(0);
-          }
-        }
-      `}</style>
+  return (
+    <>
+      <LeftBar />
+      <TopBar />
     </>
   );
 }
