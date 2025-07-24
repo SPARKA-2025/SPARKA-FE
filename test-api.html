@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SPARKA API Test - Docker Environment</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .test-button {
+            background: #3B82F6;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 5px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .test-button:hover {
+            background: #2563EB;
+        }
+        .success {
+            color: #10B981;
+            font-weight: bold;
+        }
+        .error {
+            color: #EF4444;
+            font-weight: bold;
+        }
+        .result {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 4px;
+            background: #F9FAFB;
+            border-left: 4px solid #E5E7EB;
+        }
+        .url-display {
+            font-family: monospace;
+            background: #F3F4F6;
+            padding: 5px;
+            border-radius: 3px;
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>🚗 SPARKA API Test - Docker Environment</h1>
+    <p>Testing API connectivity for Docker deployment with corrected URL configuration</p>
+
+    <div class="container">
+        <h2>🔧 Configuration Test</h2>
+        <button class="test-button" onclick="testConfig()">Test API Configuration</button>
+        <div id="config-result" class="result"></div>
+    </div>
+
+    <div class="container">
+        <h2>🏥 Backend Health Check</h2>
+        <button class="test-button" onclick="testBackendHealth()">Test Backend Health</button>
+        <div id="backend-health-result" class="result"></div>
+    </div>
+
+    <div class="container">
+        <h2>🔐 Backend Authentication</h2>
+        <button class="test-button" onclick="testBackendAuth()">Test Backend Auth</button>
+        <div id="backend-auth-result" class="result"></div>
+    </div>
+
+    <div class="container">
+        <h2>🎥 Streaming Service</h2>
+        <button class="test-button" onclick="testStreamingHealth()">Test Streaming Health</button>
+        <div id="streaming-result" class="result"></div>
+    </div>
+
+    <div class="container">
+        <h2>🔔 Notifications Test</h2>
+        <button class="test-button" onclick="testNotifications()">Test Notifications Endpoint</button>
+        <div id="notifications-result" class="result"></div>
+    </div>
+
+    <div class="container">
+        <h2>🅿️ Parking Slots Test</h2>
+        <button class="test-button" onclick="testParkingSlots()">Test Parking Slots Endpoint</button>
+        <div id="parking-result" class="result"></div>
+    </div>
+
+    <div class="container">
+        <h2>📊 Integration Service</h2>
+        <button class="test-button" onclick="testIntegrationHealth()">Test Integration Health</button>
+        <div id="integration-result" class="result"></div>
+    </div>
+
+    <script>
+        // API Configuration for local development
+        const API_CONFIG = {
+            BASE_URL: 'http://localhost:8000',
+            INTEGRATION_URL: 'http://sparka-integration:8004',
+            STREAMING_URL: 'http://sparka-streaming:8010'
+        };
+
+        function displayResult(elementId, success, message, url = null) {
+            const element = document.getElementById(elementId);
+            const statusClass = success ? 'success' : 'error';
+            const statusIcon = success ? '✅' : '❌';
+            const urlDisplay = url ? `<div class="url-display">URL: ${url}</div>` : '';
+            element.innerHTML = `<span class="${statusClass}">${statusIcon} ${message}</span>${urlDisplay}`;
+        }
+
+        async function testConfig() {
+            const config = {
+                'Backend URL': API_CONFIG.BASE_URL,
+                'Integration URL': API_CONFIG.INTEGRATION_URL,
+                'Streaming URL': API_CONFIG.STREAMING_URL,
+                'Environment': 'Docker'
+            };
+            
+            let configHtml = '<h4>Current Configuration:</h4>';
+            for (const [key, value] of Object.entries(config)) {
+                configHtml += `<div><strong>${key}:</strong> <span class="url-display">${value}</span></div>`;
+            }
+            
+            document.getElementById('config-result').innerHTML = configHtml;
+        }
+
+        async function testBackendHealth() {
+            const url = `${API_CONFIG.BASE_URL}/health`;
+            try {
+                const response = await fetch(url);
+                if (response.ok) {
+                    const data = await response.json();
+                    displayResult('backend-health-result', true, `Backend is healthy! Status: ${data.status || 'OK'}`, url);
+                } else {
+                    displayResult('backend-health-result', false, `Backend health check failed: ${response.status} ${response.statusText}`, url);
+                }
+            } catch (error) {
+                displayResult('backend-health-result', false, `Backend connection failed: ${error.message}`, url);
+            }
+        }
+
+        async function testBackendAuth() {
+            const url = `${API_CONFIG.BASE_URL}/auth/login`;
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        email: 'test@example.com',
+                        password: 'wrongpassword'
+                    })
+                });
+                
+                if (response.status === 401 || response.status === 422) {
+                    displayResult('backend-auth-result', true, 'Auth endpoint is working (returned expected error for invalid credentials)', url);
+                } else if (response.ok) {
+                    displayResult('backend-auth-result', true, 'Auth endpoint is working (login successful)', url);
+                } else {
+                    displayResult('backend-auth-result', false, `Auth endpoint error: ${response.status} ${response.statusText}`, url);
+                }
+            } catch (error) {
+                displayResult('backend-auth-result', false, `Auth endpoint connection failed: ${error.message}`, url);
+            }
+        }
+
+        async function testStreamingHealth() {
+            const url = `${API_CONFIG.STREAMING_URL}/health`;
+            try {
+                const response = await fetch(url);
+                if (response.ok) {
+                    const data = await response.json();
+                    displayResult('streaming-result', true, `Streaming service is healthy! Status: ${data.status || 'OK'}`, url);
+                } else {
+                    displayResult('streaming-result', false, `Streaming health check failed: ${response.status} ${response.statusText}`, url);
+                }
+            } catch (error) {
+                displayResult('streaming-result', false, `Streaming connection failed: ${error.message}`, url);
+            }
+        }
+
+        async function testNotifications() {
+            const url = `${API_CONFIG.BASE_URL}/notifications/public/parking-status`;
+            try {
+                const response = await fetch(url);
+                if (response.ok) {
+                    const data = await response.json();
+                    displayResult('notifications-result', true, `Notifications endpoint working! Found ${data.length || 0} notifications`, url);
+                } else {
+                    displayResult('notifications-result', false, `Notifications failed: ${response.status} ${response.statusText}`, url);
+                }
+            } catch (error) {
+                displayResult('notifications-result', false, `Notifications connection failed: ${error.message}`, url);
+            }
+        }
+
+        async function testParkingSlots() {
+            const url = `${API_CONFIG.BASE_URL}/admin/slot-parkir/get-idblok-slotname-status`;
+            try {
+                const response = await fetch(url);
+                if (response.ok) {
+                    const data = await response.json();
+                    displayResult('parking-result', true, `Parking slots endpoint working! Response received`, url);
+                } else if (response.status === 401) {
+                    displayResult('parking-result', true, 'Parking slots endpoint working (requires authentication)', url);
+                } else {
+                    displayResult('parking-result', false, `Parking slots failed: ${response.status} ${response.statusText}`, url);
+                }
+            } catch (error) {
+                displayResult('parking-result', false, `Parking slots connection failed: ${error.message}`, url);
+            }
+        }
+
+        async function testIntegrationHealth() {
+            const url = `${API_CONFIG.INTEGRATION_URL}/health`;
+            try {
+                const response = await fetch(url);
+                if (response.ok) {
+                    const data = await response.json();
+                    displayResult('integration-result', true, `Integration service is healthy! Status: ${data.status || 'OK'}`, url);
+                } else {
+                    displayResult('integration-result', false, `Integration health check failed: ${response.status} ${response.statusText}`, url);
+                }
+            } catch (error) {
+                displayResult('integration-result', false, `Integration connection failed: ${error.message}`, url);
+            }
+        }
+
+        // Auto-run configuration test on page load
+        window.onload = function() {
+            testConfig();
+        };
+    </script>
+</body>
+</html>

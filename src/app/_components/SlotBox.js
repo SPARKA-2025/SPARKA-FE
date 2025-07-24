@@ -44,7 +44,7 @@ export default function SlotBox({
       id={id}
       onClick={onClick}
       style={styles}
-      className={`rounded-md border-2 size-auto min-h-6 min-w-6 aspect-square text-black ${className}`}
+      className={`rounded-md border-2 size-auto min-h-8 min-w-8 max-h-12 max-w-12 aspect-square text-black ${className}`}
     ></div>
   );
 }

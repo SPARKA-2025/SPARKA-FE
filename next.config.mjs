@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // output: 'export',
+  output: 'standalone',
     images: {
       remotePatterns: [
         {
@@ -9,6 +9,18 @@ const nextConfig = {
           hostname: '**',
           port: '',
           pathname: '**',
+        },
+        {
+          protocol: 'http',
+          hostname: 'localhost',
+          port: '5002',
+          pathname: '/download/**',
+        },
+        {
+          protocol: 'http',
+          hostname: 'localhost',
+          port: '8000',
+          pathname: '/api/images/**',
         },
       ],
     },

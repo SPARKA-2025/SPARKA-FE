@@ -2,29 +2,29 @@ const statusEnum = [
   {
     label: "Kosong",
     style: {
-      color: "#FFFFFF",
-      border: "#337AB7",
+      color: "#22C55E", // Green for empty
+      border: "#16A34A",
     },
   },
   {
     label: "Dipilih",
     style: {
-      color: "#4859F5",
-      border: "#4859F5",
+      color: "#3B82F6", // Blue for selected
+      border: "#2563EB",
     },
   },
   {
     label: "Terisi",
     style: {
-      color: "#E1DEE5",
-      border: "#000000",
+      color: "#EF4444", // Red for occupied
+      border: "#DC2626",
     },
   },
   {
     label: "Dibooking",
     style: {
-      color: "#E90000",
-      border: "#E90000",
+      color: "#EAB308", // Yellow for booked
+      border: "#CA8A04",
     },
   },
 ];

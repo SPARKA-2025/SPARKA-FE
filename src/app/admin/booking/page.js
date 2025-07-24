@@ -20,7 +20,10 @@ export default function Main() {
   useEffect(() => {
     fetchApi({ endpoint: "/admin/parkir" }).then((res) => {
       const { parkir, parkir_khusus } = res.data
-      setBookData([ ...parkir, ...parkir_khusus]);
+      // Tambahkan flag untuk membedakan jenis booking
+      const parkirWithType = parkir.map(item => ({ ...item, bookingType: 'biasa' }));
+      const parkirKhususWithType = parkir_khusus.map(item => ({ ...item, bookingType: 'khusus' }));
+      setBookData([ ...parkirWithType, ...parkirKhususWithType]);
       console.log(res);
     });
   }, []);
@@ -30,10 +33,18 @@ export default function Main() {
     title = "Parkiran Depan Digital Center UNNES",
     parkingId = "#",
     status = "Berlangsung",
+    slotId = null,
+    platNomor = "",
+    bookingType = "biasa",
   }) {
     const currDate = date.toDateString();
     return (
-      <div className="flex flex-col min-w-fit self-start w-full lg:w-2/5 items-end bg-white shadow-xl border-primary p-5 lg:p-[2%] rounded-md">
+      <div className="relative flex flex-col min-w-fit self-start w-full lg:w-2/5 items-end bg-white shadow-xl border-primary p-5 lg:p-[2%] rounded-md">
+        {bookingType === 'khusus' && (
+          <div className="absolute top-2 right-2 bg-orange-500 text-white text-xs px-2 py-1 rounded-full font-semibold">
+            KHUSUS
+          </div>
+        )}
         <div className="flex w-full ">
           <div className="size-16 bg-primary text-white p-[1%] flex justify-center items-center text-center rounded-md">
             {filterStatus === "Berlangsung" ? (
@@ -47,16 +58,28 @@ export default function Main() {
           <div className="flex flex-col w-fit justify-between ml-4">
             <div className="flex w-full justify-between text-base items-center gap-x-4">
               <span className="text-gray-500">{currDate}</span>
-              <span className="text-primary font-medium">{filterStatus}</span>
+              <span className="text-primary font-medium">
+                {status}
+              </span>
             </div>
             <span className="flex w-full font-semibold text-primary">
               {title}
             </span>
+            {slotId && (
+              <span className="text-sm text-gray-600">
+                Slot ID: {slotId}
+              </span>
+            )}
+            {platNomor && (
+              <span className="text-sm text-gray-600">
+                Plat: {platNomor}
+              </span>
+            )}
           </div>
         </div>
         <Button
           // href={href}
-          onClick={ () => { router.push(`booking/detail/${parkingId}`)}}
+          onClick={ () => { router.push(`booking/detail/${parkingId}?type=${bookingType}`)}}
           className="w-[30%] py-1 flex justify-center bg-primary text-white rounded-lg"
         >
           Lihat
@@ -111,9 +134,12 @@ export default function Main() {
         <div className="flex flex-wrap justify-around gap-y-4">
           {bookData
             ?.filter((item) => {
-              const isSelesai =
-                item.status?.includes("Selesai") &&
+              // Cek apakah booking sudah selesai berdasarkan status slot
+              const slotData = item.slotParkir || item.slot_parkir;
+              const isSelesai = slotData?.status === "Terisi" && 
                 filterStatus.toLowerCase() === "selesai";
+              
+              // Cek apakah booking dibatalkan berdasarkan waktu_booking_berakhir
               const isDibatalkan =
                 item.waktu_booking_berakhir?.includes("1970") &&
                 filterStatus.toLowerCase() === "dibatalkan";
@@ -124,17 +150,33 @@ export default function Main() {
                 case "Dibatalkan":
                   return isDibatalkan;
                 default:
-                  return !isSelesai && !isDibatalkan;
+                  // Berlangsung: slot status Dibooking dan tidak dibatalkan
+                  return slotData?.status === "Dibooking" && !isDibatalkan;
               }
             })
-            ?.map((data, index) => (
-              <BookCard
-                key={index}
-                date={new Date(data.waktu_booking)}
-                title={data.slot__parkir.blok.nama}
-                parkingId= {data?.id}
-              />
-            ))}
+            ?.map((data, index) => {
+              // Tentukan status berdasarkan kondisi data
+              const slotData = data.slotParkir || data.slot_parkir;
+              let currentStatus = "Berlangsung";
+              if (slotData?.status === "Terisi") {
+                currentStatus = "Selesai";
+              } else if (data.waktu_booking_berakhir?.includes("1970")) {
+                currentStatus = "Dibatalkan";
+              }
+              
+              return (
+                <BookCard
+                  key={index}
+                  date={new Date(data.waktu_booking)}
+                  title={slotData?.blok?.nama || 'Unknown'}
+                  parkingId= {data?.id}
+                  slotId={slotData?.id || data?.id_slot}
+                  platNomor={data?.plat_nomor}
+                  bookingType={data?.bookingType}
+                  status={currentStatus}
+                />
+              );
+            })}
           {/* <BookCard /> */}
           <div className="flex flex-col min-w-fit self-start w-full lg:w-2/5"></div>
           {/* BookCard */}

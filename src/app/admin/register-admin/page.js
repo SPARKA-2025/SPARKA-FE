@@ -4,10 +4,11 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Box, FormLabel, TextField, InputAdornment, IconButton } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
-import { ToastContainer, toast, Bounce } from "react-toastify";
+import { toast } from "react-toastify";
 import { Button } from "@mui/base";
 import Image from "next/image";
 import Sidebar from "@components/Sidebar";
+import { API_CONFIG } from "../../lib/config/apiConfig.js";
 
 export default function RegisterAdminPage() {
   const router = useRouter();
@@ -26,7 +27,7 @@ export default function RegisterAdminPage() {
     };
 
     try {
-      const response = await fetch("/api/register-admin", {
+      const response = await fetch(`${API_CONFIG.BASE_URL}/register-admin`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -86,7 +87,6 @@ export default function RegisterAdminPage() {
         style={{ backgroundImage: "url('/assets/img/bg-adminlogin.svg')" }}
       >
         {/* Toast Container */}
-        <ToastContainer transition={Bounce} />
 
         {/* Form Box */}
         <Box

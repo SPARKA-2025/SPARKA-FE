@@ -6,6 +6,7 @@ import { Button, Tooltip } from "@mui/material";
 import Image from "next/image";
 import Link from "next/link";
 import Cookies from "js-cookie";
+import { toast } from "react-toastify";
 import ProfileIcon from "/public/assets/icon/profile.svg";
 import DashboardIcon from "/public/assets/icon/dashboard.svg";
 import BookingIcon from "/public/assets/icon/booking.svg";
@@ -13,13 +14,21 @@ import MonitoringIcon from "/public/assets/icon/monitoring.svg";
 import ReportIcon from "/public/assets/icon/report.svg";
 import fetchApi from "../lib/fetch/fetchApi";
 import logoutHandler from "../lib/action/admin/logout";
+import NotificationBell from "./NotificationBell";
 
 export default function Sidebar({ active = 0 }) {
   const router = useRouter();
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [username, setUsername] = useState("Admin");
   const dropdownRef = useRef(null);
 
-  const username = Cookies.get("username") || "Admin";
+  useEffect(() => {
+    // Set username from cookie after component mounts to avoid hydration mismatch
+    const cookieUsername = Cookies.get("username");
+    if (cookieUsername) {
+      setUsername(cookieUsername);
+    }
+  }, []);
 
   const menuItems = [
     { label: "Dashboard", icon: DashboardIcon, href: "/admin" },
@@ -42,18 +51,28 @@ export default function Sidebar({ active = 0 }) {
   const handleLogout = async () => {
   try {
     const response = await logoutHandler();
-
-    if (response?.message && response?.message !== "success") {
-      throw new Error(response.message);
-    }
+    
+    // Hapus cookies terlebih dahulu
     Cookies.remove("token");
     Cookies.remove("username");
-    router.push("/admin/login");
-    alert("Berhasil keluar.");
-
+    
+    // Tampilkan toast sukses
+    toast.success("Berhasil keluar", {
+      position: "top-center",
+      autoClose: 1500,
+    });
+    
+    // Redirect setelah delay singkat
+    setTimeout(() => {
+      router.push("/admin/login");
+    }, 1600);
+    
   } catch (error) {
     console.error("Gagal keluar:", error);
-    alert("Gagal keluar: " + error.message);
+    toast.error("Gagal keluar: " + (error.message || "Terjadi kesalahan"), {
+      position: "top-center",
+      autoClose: 3000,
+    });
   }
 };
 
@@ -68,39 +87,64 @@ export default function Sidebar({ active = 0 }) {
         />
       </div>
 
-      <div className="relative" ref={dropdownRef}>
-        <div
-          className="flex items-center gap-2 text-gray-600 cursor-pointer px-4 py-1 bg-primary rounded hover:opacity-90 transition-all"
-          onClick={() => setDropdownOpen((prev) => !prev)}
-        >
-          <ProfileIcon className="h-5 w-5 text-white" />
-          <span className="text-sm font-medium text-white">{username}</span>
-        </div>
-
-        {dropdownOpen && (
-          <div className="absolute right-0 w-40 mt-2 bg-white border border-gray-200 rounded-md shadow-md z-50">
-            <button
-              onClick={handleLogout}
-              className="flex items-center w-full gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition"
+      <div className="flex items-center gap-4">
+        {/* Notification Bell */}
+        <NotificationBell />
+        
+        {/* Admin Profile Dropdown */}
+        <div className="relative" ref={dropdownRef}>
+          <div
+              className="flex items-center gap-3 text-white cursor-pointer px-4 py-2 bg-blue-500 rounded-lg hover:bg-blue-700 transition-colors duration-200 shadow-md hover:shadow-lg"
+              onClick={() => setDropdownOpen((prev) => !prev)}
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5 text-red-600"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M17 16l4-4m0 0l-4-4m4 4H7"
-                />
-              </svg>
-              Keluar
-            </button>
+            <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center">
+              <ProfileIcon className="h-5 w-5 text-primary" />
+            </div>
+            <div className="flex flex-col items-start">
+              <span className="text-sm font-semibold text-white">{username}</span>
+              <span className="text-xs text-blue-100">Administrator</span>
+            </div>
+            <svg
+              className={`w-4 h-4 text-white transition-transform duration-200 ${
+                dropdownOpen ? 'rotate-180' : ''
+              }`}
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
           </div>
-        )}
+
+          {dropdownOpen && (
+            <div className="absolute right-0 w-48 mt-2 bg-white border border-gray-200 rounded-lg shadow-xl z-50 overflow-hidden">
+              <div className="px-4 py-3 bg-gray-50 border-b border-gray-200">
+                <p className="text-sm font-medium text-gray-800">{username}</p>
+                <p className="text-xs text-gray-500">Administrator SPARKA</p>
+              </div>
+              <button
+                onClick={handleLogout}
+                className="flex items-center w-full gap-3 px-4 py-3 text-sm text-red-600 hover:bg-red-50 transition-colors duration-200"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-5 w-5 text-red-600"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M17 16l4-4m0 0l-4-4m4 4H7"
+                  />
+                </svg>
+                <span className="font-medium">Keluar</span>
+              </button>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

@@ -46,12 +46,12 @@ export default function SlotArea({
   }, [slotData, gatewayData, gridRows, gridColumns]);
 
   return (
-    <div className="block mx-[2%] mt-[1%] mb-5 border-2 border-primary rounded-lg relative w-fit h-fit">
+    <div className="block mx-[2%] mt-[1%] mb-5 border-2 border-primary rounded-lg relative w-fit h-fit max-w-[80vw] max-h-[70vh] overflow-visible" style={{ transform: 'scale(0.8)', transformOrigin: 'center' }}>
       <div
-        className="grid gap-4 p-4"
+        className="grid gap-2 p-2 overflow-visible"
         style={{
-          gridTemplateRows: `repeat(${gridRows}, 1fr)`,
-          gridTemplateColumns: `repeat(${gridColumns}, 1fr)`,
+          gridTemplateRows: `repeat(${gridRows}, minmax(32px, 1fr))`,
+          gridTemplateColumns: `repeat(${gridColumns}, minmax(32px, 1fr))`,
         }}
       >
         {gridArray.map((item, index) => {
@@ -100,16 +100,30 @@ export default function SlotArea({
                   <SlotBox size={64} className="cursor-pointer" isActive={ isActive && currBlock.id?.includes('slot') } status={item.data.status} />
                 </div>
               ) : item.type === "gateway" ? (
-                <div
-                  id={id}
-                  className="absolute inset-0 z-10 flex justify-center items-center cursor-pointer"
-                  draggable
-                  onDragStart={onDragStart}
-                  style={{
-                    transform: transform,
-                  }}
-                >
-                  <Gateway text={item.data.text} borderPosition="y" bg={editMode} />
+                <div className="relative w-full h-full">
+                  <div
+                    id={id}
+                    className="absolute inset-0 z-10 flex justify-center items-center cursor-pointer"
+                    draggable
+                    onDragStart={onDragStart}
+                    style={{
+                      transform: transform,
+                    }}
+                  >
+                    <Gateway text={item.data.text} borderPosition="y" bg={editMode} />
+                  </div>
+                  {editMode && (
+                    <button
+                      className="absolute top-0 right-0 z-20 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs hover:bg-red-600 transition-colors"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onBlockClick({ ...item.data, id: `gateway-${item.data.id}`, action: 'delete' });
+                      }}
+                      title="Hapus Gateway"
+                    >
+                      ×
+                    </button>
+                  )}
                 </div>
               ) : editMode ? (
                 <div className="flex w-fit h-fit p-1 aspect-square">
@@ -122,19 +136,33 @@ export default function SlotArea({
               )}
 
               {cctv && showCctv && (
-                <div
-                  id={currBlock.id}
-                  draggable
-                  onDragStart={onDragStart}
-                  className="absolute w-full h-full flex justify-center items-center z-20"
-                  onClick={() => {
-                    console.log(cctv.id)
-                    onBlockClick({
-                      ...currBlock,
-                    });
-                  }}    
-                >
-                  <CctvSpotEdit isActive={activeBlock?.id === currBlock.id} angle={cctv.angle} offsetX={cctv.offset_x} offsetY={cctv.offset_y} animate={true} />
+                <div className="absolute w-full h-full z-20 overflow-visible">
+                  <div
+                    id={currBlock.id}
+                    draggable
+                    onDragStart={onDragStart}
+                    className="absolute w-full h-full flex justify-center items-center cursor-pointer overflow-visible"
+                    onClick={() => {
+                      console.log(cctv.id)
+                      onBlockClick({
+                        ...currBlock,
+                      });
+                    }}    
+                  >
+                    <CctvSpotEdit isActive={activeBlock?.id === currBlock.id} angle={cctv.angle} offsetX={cctv.offset_x} offsetY={cctv.offset_y} animate={true} />
+                  </div>
+                  {editMode && (
+                    <button
+                      className="absolute top-0 right-0 z-30 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs hover:bg-red-600 transition-colors"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onBlockClick({ ...cctv, id: `cctv-${cctv.id}`, action: 'delete' });
+                      }}
+                      title="Hapus CCTV"
+                    >
+                      ×
+                    </button>
+                  )}
                 </div>
               )}
             </div>

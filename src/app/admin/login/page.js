@@ -1,5 +1,5 @@
 "use client";
-import LoginAdmin from "@components/admin/LoginAdmin";
+import LoginAdmin from "@/app/_components/admin/LoginAdmin";
 
 export default function Main() {
   return (

@@ -1,4 +1,3 @@
-// Normal
 export default function CctvSpotEdit({
   angle = 0,
   isActive = false,
@@ -10,9 +9,9 @@ export default function CctvSpotEdit({
   offsetX = '0',
   offsetY = '0'
 }) {
-  const rotate = angle > -1 ? `rotate(${angle - 45}deg)` : undefined;
-
-  // const offestStyle = ( offsetX.includes('-') ? ` -translate-x-[${offsetX}%] ` : ` translate-x-[${offsetX}%] ` ) + ( offsetY.includes('-') ? ` -translate-y-[${offsetX}%] ` : ` translate-y-[${offsetX}%] ` )
+  // Mengatur rotasi penuh untuk slider 360 derajat
+  const normalizedAngle = angle > -1 ? angle : 0;
+  const rotate = `rotate(${normalizedAngle}deg)`;
 
   return (
     <div
@@ -22,7 +21,7 @@ export default function CctvSpotEdit({
         translate: ` ${offsetX}% ${offsetY}% `,
       }}
     >
-      {/* {angle > -1 ? ( */}
+      {/* Range area kamera CCTV */}
       <div
         style={{
           transform: rotate,
@@ -30,26 +29,19 @@ export default function CctvSpotEdit({
         }}
         className={`absolute bottom-1/2 left-1/2 w-[200%] h-[200%] bg-red-300 rounded-tr-full opacity-80`}
       ></div>
-      {isActive && (<div
-        className="absolute rounded-full bg-red-500 opacity-75 animate-ping"
-        style={{
-          width: size,
-          height: size,
-        }}
-      ></div>)}
+      
+      {/* Animasi ping saat aktif */}
+      {isActive && (
+        <div
+          className="absolute rounded-full bg-red-500 opacity-75 animate-ping"
+          style={{
+            width: size,
+            height: size,
+          }}
+        ></div>
+      )}
 
-      {/* // ) : (
-      //   animate && (
-      //     <div
-      //       className="absolute rounded-full bg-green-500 opacity-75 animate-ping"
-      //       style={{
-      //         width: size,
-      //         height: size,
-      //       }}
-      //     ></div>
-      //   )
-      // )} */}
-
+      {/* Button CCTV */}
       <button
         onClick={onClick}
         draggable={draggable}
@@ -64,5 +56,3 @@ export default function CctvSpotEdit({
     </div>
   );
 }
-
-// Psikopat

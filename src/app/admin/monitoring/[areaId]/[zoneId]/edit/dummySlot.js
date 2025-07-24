@@ -1,61 +1,23 @@
+// Dummy slot data for development
 const dummySlot = [
   {
     id: 1,
-    id_blok: 1,
-    slot_name: 1,
-    status: "Kosong",
-    x: "1",
-    y: "1",
-    created_at: "2024-08-21 23:00:44",
-    updated_at: "2024-08-23 22:17:24",
-    blok: {
-      id: 1,
-      id_fakultas: 1,
-      nama: "Blok 1",
-      panjang: "1",
-      lebar: "1",
-      deskripsi: "Blok",
-      created_at: "2024-08-21 23:00:37",
-      updated_at: "2024-08-21 23:00:37",
-    },
+    x: 1,
+    y: 1,
+    status: 'available'
   },
   {
     id: 2,
-    id_blok: 1,
-    slot_name: 2,
-    status: "Kosong",
-    x: "1",
-    y: "4",
-    created_at: "2024-08-21 23:00:45",
-    updated_at: "2024-08-29 15:12:10",
-    blok: {
-      id: 1,
-      id_fakultas: 1,
-      nama: "Blok 1",
-      panjang: "1",
-      lebar: "1",
-      deskripsi: "Blok",
-      created_at: "2024-08-21 23:00:37",
-      updated_at: "2024-08-21 23:00:37",
-    },
+    x: 2,
+    y: 1,
+    status: 'occupied'
   },
   {
-    id: 1,
-    jenis_kamera: "Camera Gateway",
-    id_fakultas: 1,
-    id_blok: 1,
-    url: "http://34.101.183.181/cmaf/veda/index.m3u8",
-    x: "7",
-    y: "1",
-    angle: "0",
-    created_at: "2024-09-05 11:53:04",
-    updated_at: "2024-09-05 11:53:04",
-  },
-  {
-    type: "empty",
-    x: 5,
-    y: 5,
-  },
+    id: 3,
+    x: 1,
+    y: 2,
+    status: 'available'
+  }
 ];
 
 export default dummySlot;

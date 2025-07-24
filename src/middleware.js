@@ -1,35 +1,36 @@
 //middleware,js
 import { NextResponse } from "next/server";
-import { cookies } from "next/headers";
-import { jwtDecode } from "jwt-decode"; // Ensure this is the correct import
+import { jwtVerify } from "jose";
 
 const publicRoutes = ["/login", "/admin/login"];
 
-export default async function middleware(req) {
-  //console.log("Middleware is running...");
+const secretKey = process.env.SESSION_SECRET;
+const encodedKey = new TextEncoder().encode(secretKey);
 
+export default async function middleware(req) {
   const path = req.nextUrl.pathname;
   const isPublicRoute = publicRoutes.includes(path);
 
   // Ambil cookie token
-  const cookie = cookies().get("token")?.value;
-  //console.log("Raw Token:", cookie);
+  const cookie = req.cookies.get("token")?.value;
 
-  let tokenData = null;
   let isAuthorized = false;
 
   if (cookie) {
     try {
-      tokenData = jwtDecode(cookie); 
-      // console.log("Decoded Token:", tokenData); -> debug only
-
-      isAuthorized = Boolean(tokenData?.iss); // Cek jika token valid
+      const { payload } = await jwtVerify(cookie, encodedKey, {
+        algorithms: ["HS256"],
+      });
+      
+      isAuthorized = Boolean(payload?.iss); // Cek jika token valid
     } catch (error) {
-      console.error("JWT Decode Error:", error);
+      console.error("JWT Verify Error:", error);
+      // Token tidak valid, hapus cookie
+      const response = NextResponse.next();
+      response.cookies.delete("token");
+      response.cookies.delete("username");
     }
   }
-
-  //console.log("Is Authorized:", isAuthorized);
 
   // Redirect jika belum login
   if (!isPublicRoute && !isAuthorized) {

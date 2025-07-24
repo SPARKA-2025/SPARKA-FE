@@ -18,21 +18,32 @@ const loginHandler = async (formData) => {
 
     const { access_token: accToken, expires_in: exIn } = response || {};
 
-    if (!accToken) return response;
+    if (!accToken) {
+      return {
+        message: response?.message || "Login gagal. Periksa email dan password Anda."
+      };
+    }
 
+    // Decrypt token to get user info for username cookie
     const decrypted = await decrypt(accToken);
+    
+    if (!decrypted) {
+      return { message: "Token verification failed" };
+    }
 
     const cookieOptions = {
-      httpOnly: true,
+      httpOnly: false, // Changed to false so client-side JavaScript can access it
       secure: process.env.NODE_ENV === "production",
       expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
       sameSite: "strict",
       path: "/",
     };
 
+    // Store the raw token for middleware verification
     cookies().set("token", accToken, cookieOptions);
 
-    cookies().set("username", decrypted?.name || "", {
+    // Store username from decrypted token
+    cookies().set("username", decrypted?.nama || decrypted?.name || "", {
       ...cookieOptions,
       httpOnly: false,
     });

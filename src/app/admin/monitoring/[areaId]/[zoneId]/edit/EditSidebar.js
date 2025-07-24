@@ -16,7 +16,8 @@ export default function EditSidebar({
   partData,
   activePart = { column: 0, row: 0},
   onChangePart,
-  onSubmit
+  onSubmit,
+  isSaving = false
 }) {
   const router = useRouter()
   return (
@@ -29,10 +30,14 @@ export default function EditSidebar({
           Cancel
         </div>
         <div
-          onClick={onSubmit}
-          className="bg-primary rounded-lg text-white font-semibold w-full text-center my-2 cursor-pointer"
+          onClick={isSaving ? undefined : onSubmit}
+          className={`rounded-lg text-white font-semibold w-full text-center my-2 ${
+            isSaving 
+              ? 'bg-gray-400 cursor-not-allowed' 
+              : 'bg-primary cursor-pointer'
+          }`}
         >
-          Save
+          {isSaving ? 'Saving...' : 'Save'}
         </div>
       </div>
       <div className="flex w-full justify-between py-2">
@@ -168,7 +173,7 @@ function SizeSetting({ id, label, value, onInputSizeChange, onInputSizeBlur }) {
 function ToogleSetting({ label, value = true, onClick, name }) {
   return (
     <div
-      onClick={() => onClick(name, value)}
+      onClick={() => onClick(name, !value)}
       className="flex w-full h-[20%] text-primary justify-between items-center relative cursor-pointer"
     >
       <span className="flex w-fit font-medium">{label}</span>
@@ -210,9 +215,12 @@ function BlockProps({ activeBlock, onChange }) {
     return <div>Kosong atau Tidak Valid</div>;
   }
 
+  // Convert id to string to ensure includes method works
+  const idString = String(id);
+
   return (
     <div className="text-primary">
-      {id?.includes("cctv") && (
+      {idString?.includes("cctv") && (
         <CCTVProps
           activeId={id}
           angle={activeBlock?.angle || 0}
@@ -220,7 +228,7 @@ function BlockProps({ activeBlock, onChange }) {
           onChange={onChange}
         />
       )}
-      {id?.includes("gateway") && (
+      {idString?.includes("gateway") && (
         <GatewayProps
         activeId={id}
         direction={activeBlock?.direction || 'horizontal'}
@@ -236,25 +244,29 @@ function BlockProps({ activeBlock, onChange }) {
 
 function CCTVProps({ activeId, angle, url, onChange }) {
   return (
-    <div className="flex flex-col gap-y-2">
-      <div className="flex w-full justify-between">
-        <span>Angle</span>
+    <div className="flex flex-col gap-y-3">
+      <div className="flex flex-col gap-y-1">
+        <div className="flex w-full justify-between items-center">
+          <span>Angle</span>
+          <span className="text-sm font-mono">{angle}°</span>
+        </div>
         <input
-          type="number"
+          type="range"
           value={angle}
           min="0"
           max="360"
           onChange={(e) => onChange(activeId, {angle: e.target.value})}
-          className="text-right w-12 bg-black bg-opacity-10 rounded-sm px-1"
+          className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
         />
       </div>
-      <div className="flex w-full justify-between">
+      <div className="flex flex-col gap-y-1">
         <span>URL</span>
         <input
           type="text"
           value={url}
           onChange={(e) => onChange(activeId, {url: e.target.value})}
-          className="text-right w-12 bg-black bg-opacity-10 rounded-sm px-1"
+          className="w-full bg-black bg-opacity-10 rounded-sm px-2 py-1 text-sm"
+          placeholder="Masukkan URL kamera"
         />
       </div>
     </div>

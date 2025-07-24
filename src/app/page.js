@@ -43,7 +43,7 @@ export default function Home() {
     return (
       <header className="fixed top-0 left-0 right-0 bg-white text-gray-700 py-4 px-6 md:px-20 flex justify-between items-center shadow-md z-50 h-16">
         <div className="flex items-center gap-2">
-          <Image src="/assets/img/unnesxsparka-colour.svg" alt="Logo SPARKA" width={250} height={40} />
+          <Image src="/assets/img/unnesxsparka-colour.svg" alt="Logo SPARKA" width={250} height={40} priority style={{width: 'auto', height: 'auto'}} />
         </div>
         <nav className="hidden md:flex gap-20">
           {["masthead", "about", "why-choose", "services", "contact"].map((section) => (
@@ -82,10 +82,10 @@ export default function Home() {
         id="masthead"
         className="relative w-full min-h-screen pt-16 text-white flex flex-col items-center justify-center text-center px-6"
       >
-        <Image src="/assets/img/masthead.png" alt="Latar Parkir" fill className="object-cover -z-10" />
+        <Image src="/assets/img/masthead.png" alt="Latar Parkir" fill className="object-cover -z-10" priority sizes="100vw" />
         <div className="absolute inset-0 bg-black/60 -z-5" />
         <div className="relative z-10 max-w-4xl mx-auto space-y-6">
-          <Image src="/assets/img/sparka-logo-square.svg" alt="Logo SPARKA Kotak" width={200} height={50} className="mx-auto" />
+          <Image src="/assets/img/sparka-logo-square.svg" alt="Logo SPARKA Kotak" width={200} height={50} className="mx-auto" priority style={{width: 'auto', height: 'auto'}} />
           <h1 className="text-4xl md:text-6xl font-bold bg-black/40 px-6 py-4 rounded-xl shadow-md backdrop-blur-sm">
             Selamat Datang di SPARKA
           </h1>

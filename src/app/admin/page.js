@@ -20,8 +20,10 @@ export default function Main() {
 
   const fetchFakultas = async () => {
     try {
-      const res = await fetchApi({ endpoint: `/admin/fakultas` });
+      const res = await fetchApi({ endpoint: `/admin/fakultas-with-statistics` });
       setListFakultas(res.data);
+      
+      // Data fakultas sudah termasuk statistik dari backend
     } catch (error) {
       console.error("Gagal mengambil data fakultas:", error);
     }
@@ -113,25 +115,33 @@ export default function Main() {
   };
 
   return (
-    <main className="bg-white-smoke h-screen justify-start px-2 flex flex-wrap overflow-y-auto pt-[4%]">
-      <div className="bg-white m-[4%] p-[4%] h-fit flex flex-wrap justify-evenly gap-x-1 w-[80%] mx-auto">
-        {listFakultas.map((fakultas, index) => (
-          <AreaCard
-            key={index}
-            title={fakultas?.nama || "Judul"}
-            desc={fakultas?.deskripsi}
-            href={`admin/monitoring/${fakultas.id}`}
-            imageBase64={fakultas?.image}
-            onEditClick={(e) => handleEditClick(e, fakultas)}
-          />
-        ))}
-        <div className="flex w-full h-[256px] mb-12 py-2 justify-center">
+    <main className="bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen overflow-y-auto pt-[6%]">
+      <div className="container mx-auto px-6 py-8">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-800 mb-2">Dashboard Admin SPARKA</h1>
+          <p className="text-gray-600">Kelola area parkir dan monitoring sistem</p>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 justify-items-center">
+          {listFakultas.map((fakultas, index) => (
+            <AreaCard
+              key={index}
+              title={fakultas?.nama || "Judul"}
+              desc={fakultas?.deskripsi}
+              href={`admin/monitoring/${fakultas.id}`}
+              imageBase64={fakultas?.image}
+              onEditClick={(e) => handleEditClick(e, fakultas)}
+              slotStats={fakultas.statistics}
+            />
+          ))}
+          
           <div
             onClick={handleAddClick}
-            className="w-full h-fit flex flex-wrap cursor-pointer mx-2 p-8 rounded-xl shadow-lg text-primary flex-col mb-6 min-h-[280px] bg-white justify-center items-center"
+            className="w-full min-h-[400px] flex flex-col cursor-pointer p-8 rounded-xl shadow-xl text-primary bg-white justify-center items-center hover:shadow-2xl transition-all duration-300 hover:scale-105 border-2 border-dashed border-gray-300 hover:border-primary"
           >
-            <div className="font-black text-7xl">+</div>
-            <div className="text-center font-semibold">Tambahkan Fakultas</div>
+            <div className="font-black text-6xl mb-4 text-gray-400">+</div>
+            <div className="text-center font-semibold text-lg text-gray-600">Tambahkan Fakultas</div>
+            <div className="text-center text-sm text-gray-400 mt-2">Klik untuk menambah area baru</div>
           </div>
         </div>
       </div>

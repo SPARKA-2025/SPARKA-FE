@@ -10,36 +10,68 @@ export default function AreaCard({
   href = "#",
   desc = defaultDesc,
   imageBase64,
-  onEditClick
+  onEditClick,
+  slotStats = null
 }) {
 
   const router = useRouter()
   return (
     <div
       onClick={() => router.push(href)}
-      className="w-[360px] min-w-[240px] max-w-[30%] mx-4 p-4 m-2 rounded-lg overflow-hidden shadow-lg bg-white cursor-pointer"
+      className="w-full max-w-[300px] min-w-[250px] mx-auto p-0 m-3 rounded-xl overflow-hidden shadow-xl bg-white cursor-pointer hover:shadow-2xl transition-all duration-300 hover:scale-105"
     >
-      <div className="relative h-48">
+      <div className="relative h-40 overflow-hidden">
         <Image
           src={imageBase64 ? `data:image/jpeg;base64,${imageBase64}` : defaultBase64Image}
           alt="Faculty image"
           layout="fill"
           objectFit="cover"
-          className="rounded-t-lg"
+          className="rounded-t-xl transition-transform duration-300 hover:scale-110"
         />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
+        
+        {/* Overlay Statistik Slot Parkir */}
+        {slotStats && (
+          <div className="absolute bottom-2 left-2 right-2">
+            <div className="bg-white/95 backdrop-blur-md rounded-lg p-2 shadow-sm border border-white/20">
+              <div className="flex justify-between items-center gap-2 text-xs">
+                <div className="text-center">
+                  <div className="font-bold text-green-700">{slotStats.kosong || 0}</div>
+                  <div className="text-green-600 font-medium">Kosong</div>
+                </div>
+                <div className="text-center">
+                  <div className="font-bold text-red-700">{slotStats.terisi || 0}</div>
+                  <div className="text-red-600 font-medium">Terisi</div>
+                </div>
+                <div className="text-center">
+                  <div className="font-bold text-yellow-700">{slotStats.dibooking || 0}</div>
+                  <div className="text-yellow-600 font-medium">Booking</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
-      <div className="px-4 pt-4 h-full relative">
-        <h2 className="text-xl font-bold mb-2 text-primary h-[16%]">{title}</h2>
-        <p className="text-gray-700 text-xs mb-4 hidden md:flex">{desc.length > 230 ? `${desc.slice(0,230)}...` : desc}</p>
-        <p className="text-gray-700 text-base mb-4 w-full text-end bottom-0 gap-x-2">
-          <span className="hover:bg-slate-100 rounded-md min-w-12 p-2" onClick={onEditClick}>
+      <div className="p-5 flex flex-col h-[220px]">
+        <h2 className="text-lg font-bold mb-2 text-primary line-clamp-2 min-h-[56px] flex items-start">{title}</h2>
+        <p className="text-gray-600 text-xs mb-3 leading-relaxed line-clamp-3 flex-1">
+          {desc}
+        </p>
+        <div className="flex justify-between items-center pt-2 border-t border-gray-100 mt-auto">
+          <button 
+            className="bg-blue-700 hover:bg-blue-800 text-white font-medium text-sm px-4 py-2 rounded-md transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105" 
+            onClick={(e) => {
+              e.stopPropagation();
+              onEditClick(e);
+            }}
+          >
             Edit
-          </span>
-          <span className="hover:bg-slate-100 rounded-md min-w-12 p-2">
+          </button>
+          <span className="bg-green-700 hover:bg-green-800 text-white font-medium text-sm px-4 py-2 rounded-md shadow-md cursor-pointer transition-all duration-200 hover:shadow-lg transform hover:scale-105">
             Buka Area
           </span>
-        </p>
-      </div>
+        </div>
+        </div>
     </div>
   );
 }

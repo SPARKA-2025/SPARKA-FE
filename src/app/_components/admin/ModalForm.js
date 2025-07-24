@@ -15,9 +15,7 @@ export default function ModalForm({
   onFileChange
 }) {
 
-  useEffect(() => {
-    console.log("ModalForm received updated values:", values); // Debugging log
-  }, [values]);
+
   
 
   return (

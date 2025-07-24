@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Box, FormLabel, TextField, InputAdornment, IconButton } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
-import { ToastContainer, toast, Bounce } from "react-toastify";
+import { toast } from "react-toastify";
 import { Button } from "@mui/base";
 import Image from "next/image";
 import loginAdmin from "@/app/lib/action/admin/login";
@@ -24,14 +24,16 @@ export default function LoginAdmin() {
     const data = await loginAdmin(formData);
     if (data?.access_token) {
       toast.success("Berhasil masuk sebagai admin.", {
-        autoClose: 2000,
+        autoClose: 1500,
       });
-
+      
+      // Redirect setelah delay singkat untuk memastikan toast muncul
       setTimeout(() => {
         router.push("/admin");
-      }, 2000);
+      }, 1600);
     } else {
-      toast.error(`Gagal masuk: ${data.message}`, {
+      const errorMessage = data?.message || "Terjadi kesalahan saat login";
+      toast.error(`Gagal masuk: ${errorMessage}`, {
         autoClose: 3000,
       });
     }
@@ -52,7 +54,7 @@ export default function LoginAdmin() {
         backgroundPosition: "center",
       }}
     >
-      <ToastContainer transition={Bounce} />
+
       <Box
         component="form"
         onSubmit={handleSubmit}
